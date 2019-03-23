@@ -10,6 +10,7 @@ link_directories(${V-REP_PATH})
 set(SOURCE_FILES
         ${V-REP_PATH}/programming/b0RemoteApiBindings/cpp/b0RemoteApi.cpp
         ackermann_car.cpp
+        pid.cpp
         main.cpp
         )
 
