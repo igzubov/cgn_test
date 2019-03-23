@@ -1,57 +1,59 @@
 #include <b0RemoteApi.h>
+#include "ackermann_car.h"
 
-class AckermannCar {
-public:
-    AckermannCar(b0RemoteApi *_client, const std::string &name) {
-        client = _client;
-        auto answ = client->simxGetObjectHandle(name.c_str(), client->simxServiceCall());
-        carHandle = b0RemoteApi::readInt(answ, 1);
-        answ = client->simxGetObjectHandle("nakedCar_steeringLeft", client->simxServiceCall());
-        lSteerHandle = b0RemoteApi::readInt(answ, 1);
-        answ = client->simxGetObjectHandle("nakedCar_steeringRight", client->simxServiceCall());
-        rSteerHandle = b0RemoteApi::readInt(answ, 1);
-        answ = client->simxGetObjectHandle("nakedCar_motorLeft", client->simxServiceCall());
-        lMotorHandle = b0RemoteApi::readInt(answ, 1);
-        answ = client->simxGetObjectHandle("nakedCar_motorRight", client->simxServiceCall());
-        rMotorHandle = b0RemoteApi::readInt(answ, 1);
+AckermannCar::AckermannCar(b0RemoteApi *client, const std::string &name) {
+    _client = client;
+    auto answ = client->simxGetObjectHandle(name.c_str(), _client->simxServiceCall());
+    carHandle = b0RemoteApi::readInt(answ, 1);
+    answ = _client->simxGetObjectHandle("nakedCar_steeringLeft", _client->simxServiceCall());
+    lSteerHandle = b0RemoteApi::readInt(answ, 1);
+    answ = _client->simxGetObjectHandle("nakedCar_steeringRight", _client->simxServiceCall());
+    rSteerHandle = b0RemoteApi::readInt(answ, 1);
+    answ = _client->simxGetObjectHandle("nakedCar_motorLeft", _client->simxServiceCall());
+    lMotorHandle = b0RemoteApi::readInt(answ, 1);
+    answ = _client->simxGetObjectHandle("nakedCar_motorRight", _client->simxServiceCall());
+    rMotorHandle = b0RemoteApi::readInt(answ, 1);
 
-        auto topic_pos = client->simxCreateSubscriber(boost::bind(&AckermannCar::carPosCallback, this, _1));
-        auto answ1 = client->simxGetObjectPosition(carHandle, -1, topic_pos);
+    auto topic = client->simxCreateSubscriber(boost::bind(&AckermannCar::carPosCallback, this, _1));
+    _client->simxGetObjectPosition(carHandle, -1, topic);
+    topic = client->simxCreateSubscriber(boost::bind(&AckermannCar::carOrientCallback, this, _1));
+    _client->simxGetObjectOrientation(carHandle, -1, topic);
+
+
+    setSteeringAngle(0);
+    setSpeed(0);
+}
+
+void AckermannCar::setSteeringAngle(double angle) {
+    if (angle > 45) {
+        angle = 45;
     }
-    void setSteeringAngle(double angle) {
-        double radAngle = (angle * M_PI) / 180;
-        double steeringAngleLeft = atan(l/(-d+l/tan(radAngle)));
-        double steeringAngleRight = atan(l/(d+l/tan(radAngle)));
-
-        client->simxSetJointTargetPosition(lSteerHandle, steeringAngleLeft, client->simxDefaultPublisher());
-        client->simxSetJointTargetPosition(rSteerHandle, steeringAngleRight, client->simxDefaultPublisher());
-    }
-    void setSpeed(float speed) {
-
-    }
-private:
-    b0RemoteApi *client;
-    int carHandle;
-    int lSteerHandle;
-    int rSteerHandle;
-    int lMotorHandle;
-    int rMotorHandle;
-
-    // 2*d=distance between left and right wheels
-    const float d = 0.755;
-    // distance between front and read wheels
-    const float l = 2.5772;
-
-    void setJointTargetPos(float pos) {
-
-    }
-    void setJointTargetVel(float speed) {
-
+    else if (angle < -45) {
+        angle = -45;
     }
 
-    void carPosCallback(std::vector<msgpack::object>* msg) {
-        std::vector<float> pos;
-        b0RemoteApi::readFloatArray(msg, pos, 1);
-        std::cout << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
-    }
-};
+    double radAngle = (angle * M_PI) / 180;
+    double steeringAngleLeft = atan(l/(-d+l/tan(radAngle)));
+    double steeringAngleRight = atan(l/(d+l/tan(radAngle)));
+
+    _client->simxSetJointTargetPosition(lSteerHandle, steeringAngleLeft, _client->simxDefaultPublisher());
+    _client->simxSetJointTargetPosition(rSteerHandle, steeringAngleRight, _client->simxDefaultPublisher());
+}
+
+void AckermannCar::setSpeed(float speed) {
+    _client->simxSetJointTargetVelocity(lMotorHandle, speed, _client->simxDefaultPublisher());
+    _client->simxSetJointTargetVelocity(rMotorHandle, speed, _client->simxDefaultPublisher());
+}
+
+void AckermannCar::carPosCallback(std::vector<msgpack::object>* msg) {
+    std::vector<float> pos;
+    b0RemoteApi::readFloatArray(msg, pos, 1);
+    // std::cout << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
+}
+
+void AckermannCar::carOrientCallback(std::vector<msgpack::object>* msg) {
+    std::vector<float> orient;
+    b0RemoteApi::readFloatArray(msg, orient, 1);
+    // roll yaw pitch
+    std::cout << orient[0] << " " << orient[1] << " " << orient[2] << std::endl;
+}
