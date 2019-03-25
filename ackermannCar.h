@@ -4,12 +4,15 @@
 using namespace boost::geometry;
 using Point2D = model::point<double, 2, cs::cartesian>;
 
-class AckermannCar : DrivableRobot {
+class AckermannCar : public DrivableRobot {
 public:
     AckermannCar(b0RemoteApi *client, const std::string &name);
+
     // in degrees
     void setSteeringAngle(double angle);
+
     void setSpeed(float speed);
+
 private:
     int lSteerHandle;
     int rSteerHandle;
@@ -25,6 +28,7 @@ private:
     // distance between front and read wheels
     const float l = 2.5772;
 
-    void fGpsCallback(std::vector<msgpack::object>* msg);
-    void rGpsCallback(std::vector<msgpack::object>* msg);
+    void fGpsCallback(std::vector<msgpack::object> *msg);
+
+    void rGpsCallback(std::vector<msgpack::object> *msg);
 };
