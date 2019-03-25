@@ -12,8 +12,8 @@ public:
         auto answ = client->simxGetObjectHandle(name.c_str(), _client->simxServiceCall());
         robotHandle = b0RemoteApi::readInt(answ, 1);
     };
-    virtual Point2D getPosition() {return position;};
-    virtual double getYaw() {return yaw * 180 / M_PI;};
+    Point2D getPosition() {return position;};
+    double getYaw() {return yaw * 180 / M_PI;};
     // in degrees
     virtual void setSteeringAngle(double angle) = 0;
     virtual void setSpeed(float speed) = 0;

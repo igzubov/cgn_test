@@ -9,8 +9,9 @@ link_directories(${V-REP_PATH})
 
 set(SOURCE_FILES
         ${V-REP_PATH}/programming/b0RemoteApiBindings/cpp/b0RemoteApi.cpp
-        ackermann_car.cpp
+        ackermannCar.cpp
         pid.cpp
+        pathFollower.cpp
         main.cpp
         )
 
