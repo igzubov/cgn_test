@@ -14,7 +14,8 @@ using Point2D = model::point<double, 2, cs::cartesian>;
 
 class Application {
 public:
-    Application(b0RemoteApi *client) : car(client, "nakedAckermannSteeringCar") {
+    Application(b0RemoteApi *client) {
+        _car = new AckermannCar(client, "nakedAckermannSteeringCar");
         _client = client;
     }
 
@@ -22,19 +23,19 @@ public:
         PathFollower pf("points.txt");
 
         while (!pf._achievedPoint | !pf.isEmpty()) {
-            double deltaAngle = pf.getDeltaAngle(car.getYaw(), car.getPosition());
-            car.setSteeringAngle(deltaAngle);
-            car.setSpeed(5);
+            double deltaAngle = pf.getDeltaAngle(_car->getYaw(), _car->getPosition());
+            _car->setSteeringAngle(deltaAngle);
+            _car->setSpeed(5);
             _client->simxSpinOnce();
             _client->simxSleep(50);
         }
-        car.setSteeringAngle(0);
-        car.setSpeed(0);
+        _car->setSteeringAngle(0);
+        _car->setSpeed(0);
     }
 
 private:
     b0RemoteApi *_client;
-    AckermannCar car;
+    DrivableRobot *_car;
 };
 
 int main() {

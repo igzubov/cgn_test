@@ -14,19 +14,19 @@ public:
     void setSpeed(float speed);
 
 private:
-    int lSteerHandle;
-    int rSteerHandle;
-    int lMotorHandle;
-    int rMotorHandle;
-    int fGpsHandle;
-    int rGpsHandle;
+    int _lSteerHandle;
+    int _rSteerHandle;
+    int _lMotorHandle;
+    int _rMotorHandle;
+    int _fGpsHandle;
+    int _rGpsHandle;
 
-    Point2D fGps;
-    Point2D rGps;
-    // 2*d=distance between left and right wheels
-    const float d = 0.755;
+    Point2D _fGps;
+    Point2D _rGps;
+    // 2*_d=distance between left and right wheels
+    const float _d = 0.755;
     // distance between front and read wheels
-    const float l = 2.5772;
+    const float _l = 2.5772;
 
     void fGpsCallback(std::vector<msgpack::object> *msg);
 

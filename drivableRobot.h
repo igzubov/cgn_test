@@ -10,16 +10,16 @@ public:
     DrivableRobot(b0RemoteApi *client, const std::string &name) {
         _client = client;
         auto answ = client->simxGetObjectHandle(name.c_str(), _client->simxServiceCall());
-        robotHandle = b0RemoteApi::readInt(answ, 1);
+        _robotHandle = b0RemoteApi::readInt(answ, 1);
     };
-    Point2D getPosition() {return position;};
-    double getYaw() {return yaw * 180 / M_PI;};
+    Point2D getPosition() {return _position;};
+    double getYaw() {return _yaw * 180 / M_PI;};
     // in degrees
     virtual void setSteeringAngle(double angle) = 0;
     virtual void setSpeed(float speed) = 0;
 protected:
     b0RemoteApi *_client;
-    int robotHandle;
-    Point2D position;
-    double yaw;
+    int _robotHandle;
+    Point2D _position;
+    double _yaw;
 };

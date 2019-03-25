@@ -1,38 +1,38 @@
 #include "pathFollower.h"
 
-PathFollower::PathFollower(const std::string &fileName) : pointsStream(fileName.c_str(), std::ios_base::in) {
-    readPoints(wayPoints);
+PathFollower::PathFollower(const std::string &fileName) : _pointsStream(fileName.c_str(), std::ios_base::in) {
+    readPoints(_wayPoints);
 }
 
 
 bool PathFollower::isEmpty() {
-    return wayPoints.empty();
+    return _wayPoints.empty();
 }
 
 void PathFollower::readPoints(std::queue<Point2D> &points) {
     int num = 0;
     int x = 0, y = 0;
-    pointsStream >> num;
+    _pointsStream >> num;
     for (int i = 0; i < num; i++) {
-        pointsStream >> x >> y;
+        _pointsStream >> x >> y;
         Point2D point(x, y);
         points.push(point);
     }
 }
 
 void PathFollower::checkPointAchievement(Point2D currPos) {
-    if (fabs(currPos.get<0>() - _currTarget.get<0>()) < achieveXEps &
-        fabs(currPos.get<1>() - _currTarget.get<1>()) < achieveYEps) {
+    if (fabs(currPos.get<0>() - _currTarget.get<0>()) < _achieveXEps &
+        fabs(currPos.get<1>() - _currTarget.get<1>()) < _achieveYEps) {
         _achievedPoint = true;
         _prevTarget = _currTarget;
-        wayPoints.pop();
+        _wayPoints.pop();
         std::cout << "Point achieved!" << std::endl;
     }
 }
 
 double PathFollower::getDeltaAngle(double yaw, Point2D currPos) {
     if (_achievedPoint) {
-        _currTarget = wayPoints.front();
+        _currTarget = _wayPoints.front();
         _achievedPoint = false;
         std::cout << "Point is " << _currTarget.get<0>() << " " << _currTarget.get<0>() << std::endl;
     }

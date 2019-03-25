@@ -5,7 +5,6 @@
 #include <iostream>
 
 using namespace boost::geometry;
-
 using Point2D = model::point<double, 2, cs::cartesian>;
 
 class PathFollower {
@@ -13,22 +12,23 @@ public:
     PathFollower(const std::string &fileName);
 
     bool _achievedPoint = true;
-    const double achieveXEps = 1;
-    const double achieveYEps = 1;
+    const double _achieveXEps = 1;
+    const double _achieveYEps = 1;
 
     bool isEmpty();
 
-    void readPoints(std::queue<Point2D> &points);
 
     double getDeltaAngle(double yaw, Point2D currPos);
 
 private:
-    std::fstream pointsStream;
-    std::queue<Point2D> wayPoints;
+    std::fstream _pointsStream;
+    std::queue<Point2D> _wayPoints;
     Point2D _prevTarget;
     Point2D _currTarget;
     Point2D _prevPos;
     Point2D _currPos;
+
+    void readPoints(std::queue<Point2D> &points);
 
     void checkPointAchievement(Point2D currentPos);
 
