@@ -1,7 +1,9 @@
 #include <b0RemoteApi.h>
 #include "ackermannCar.h"
+#include <thread>
 
-AckermannCar::AckermannCar(b0RemoteApi *client, const std::string &name) : DrivableRobot(client, name) {
+AckermannCar::AckermannCar(b0RemoteApi *client, const std::string name, const unsigned long dim) : DrivableRobot(client, name, dim),
+                                                                                        _fGps(dim), _rGps(dim) {
     auto answ = _client->simxGetObjectHandle("nakedCar_steeringLeft", _client->simxServiceCall());
     _lSteerHandle = b0RemoteApi::readInt(answ, 1);
     answ = _client->simxGetObjectHandle("nakedCar_steeringRight", _client->simxServiceCall());
@@ -47,15 +49,12 @@ void AckermannCar::setSpeed(float speed) {
 }
 
 void AckermannCar::fGpsCallback(std::vector<msgpack::object> *msg) {
-    std::vector<float> pos;
-    b0RemoteApi::readFloatArray(msg, pos, 1);
-    _fGps.set<0>(pos[0]);
-    _fGps.set<1>(pos[1]);
+    b0RemoteApi::readFloatArray(msg, _fGps, 1);
     _position = _fGps;
 
     // calc _yaw [-pi, pi]
-    double deltaX = _fGps.get<0>() - _rGps.get<0>();
-    double deltaY = _fGps.get<1>() - _rGps.get<1>();
+    double deltaX = _fGps[0] - _rGps[0];
+    double deltaY = _fGps[1] - _rGps[1];
     double angle = atan2(deltaX, deltaY);
 
     if (angle > M_PI) {
@@ -68,7 +67,5 @@ void AckermannCar::fGpsCallback(std::vector<msgpack::object> *msg) {
 
 void AckermannCar::rGpsCallback(std::vector<msgpack::object> *msg) {
     std::vector<float> pos;
-    b0RemoteApi::readFloatArray(msg, pos, 1);
-    _rGps.set<0>(pos[0]);
-    _rGps.set<1>(pos[1]);
+    b0RemoteApi::readFloatArray(msg, _rGps, 1);
 }

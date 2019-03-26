@@ -1,12 +1,12 @@
 #include <boost/geometry/geometries/point_xy.hpp>
 #include "drivableRobot.h"
 
-using namespace boost::geometry;
-using Point2D = model::point<double, 2, cs::cartesian>;
+#ifndef ACKERMANNCAR_H
+#define ACKERMANNCAR_H
 
 class AckermannCar : public DrivableRobot {
 public:
-    AckermannCar(b0RemoteApi *client, const std::string &name);
+    AckermannCar(b0RemoteApi *client, const std::string name, const unsigned long dim);
 
     // in degrees
     void setSteeringAngle(double angle);
@@ -14,15 +14,15 @@ public:
     void setSpeed(float speed);
 
 private:
-    int _lSteerHandle;
-    int _rSteerHandle;
-    int _lMotorHandle;
-    int _rMotorHandle;
-    int _fGpsHandle;
-    int _rGpsHandle;
+    int _lSteerHandle = 0;
+    int _rSteerHandle = 0;
+    int _lMotorHandle = 0;
+    int _rMotorHandle = 0;
+    int _fGpsHandle = 0;
+    int _rGpsHandle = 0;
 
-    Point2D _fGps;
-    Point2D _rGps;
+    std::vector<float> _fGps;
+    std::vector<float> _rGps;
     // 2*_d=distance between left and right wheels
     const float _d = 0.755;
     // distance between front and read wheels
@@ -32,3 +32,5 @@ private:
 
     void rGpsCallback(std::vector<msgpack::object> *msg);
 };
+
+#endif //ACKERMANNCAR_H
