@@ -12,6 +12,7 @@ set(SOURCE_FILES
         ackermannCar.cpp
         pid.cpp
         pathFollower.cpp
+        trajVisualizer.cpp
         main.cpp
         )
 
