@@ -9,7 +9,7 @@ public:
         _robotHandle = b0RemoteApi::readInt(answ, 1);
     };
 
-    virtual ~DrivableRobot() = {};
+    virtual ~DrivableRobot() = default;
     std::vector<float> getPosition() {return _position;};
     double getYaw() {return _yaw * 180 / M_PI;};
     // in degrees
