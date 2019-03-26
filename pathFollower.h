@@ -3,9 +3,10 @@
 #include <fstream>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <iostream>
+#include "trajVisualizer.h"
 
-using namespace boost::geometry;
-using Point2D = model::point<double, 2, cs::cartesian>;
+#ifndef PATHFOLLOWER_H
+#define PATHFOLLOWER_H
 
 class PathFollower {
 public:
@@ -18,20 +19,23 @@ public:
     bool isEmpty();
 
 
-    double getDeltaAngle(double yaw, Point2D currPos);
+    double getDeltaAngle(double yaw, std::vector<float> currPos);
+
+    std::queue<std::vector<float>> getPoints();
 
 private:
     std::fstream _pointsStream;
-    std::queue<Point2D> _wayPoints;
-    Point2D _prevTarget;
-    Point2D _currTarget;
-    Point2D _prevPos;
-    Point2D _currPos;
+    std::queue<std::vector<float>> _wayPoints;
+    std::vector<float> _prevTarget;
+    std::vector<float> _currTarget;
+    std::vector<float> _prevPos;
+    std::vector<float> _currPos;
 
-    void readPoints(std::queue<Point2D> &points);
+    void readPoints(std::queue<std::vector<float>> &points);
 
-    void checkPointAchievement(Point2D currentPos);
+    void checkPointAchievement(std::vector<float> currPos);
 
     double cutAngle(double &bigAngle);
-
 };
+
+#endif //PATHFOLLOWER_H
