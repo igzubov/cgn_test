@@ -4,14 +4,17 @@
 #ifndef ACKERMANNCAR_H
 #define ACKERMANNCAR_H
 
-class AckermannCar : public DrivableRobot {
+class AckermannCar : public DrivableRobot, public std::enable_shared_from_this<AckermannCar> {
 public:
-    AckermannCar(b0RemoteApi *client, const std::string name, const unsigned long dim);
+    AckermannCar(std::shared_ptr<b0RemoteApi> client, const std::string name, const double leftRightWheelDist,
+                 const double frontRearWheelDist, const double maxSteeringAngle, const unsigned long dim);
 
     // in degrees
     void setSteeringAngle(double angle);
 
     void setSpeed(float speed);
+
+    void initSensors();
 
 private:
     int _lSteerHandle = 0;
@@ -23,10 +26,10 @@ private:
 
     std::vector<float> _fGps;
     std::vector<float> _rGps;
-    // 2*_d=distance between left and right wheels
-    const float _d = 0.755;
-    // distance between front and read wheels
-    const float _l = 2.5772;
+
+    double _leftRightWheelDistance;
+    double _frontRearWheelDistance;
+
 
     void fGpsCallback(std::vector<msgpack::object> *msg);
 

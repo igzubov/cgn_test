@@ -2,8 +2,10 @@
 #include "ackermannCar.h"
 #include <thread>
 
-AckermannCar::AckermannCar(b0RemoteApi *client, const std::string name, const unsigned long dim) : DrivableRobot(client, name, dim),
-                                                                                        _fGps(dim), _rGps(dim) {
+AckermannCar::AckermannCar(std::shared_ptr<b0RemoteApi> client, const std::string name, const double leftRightWheelDist,
+                           const double frontRearWheelDist, const double maxSteeringAngle, const unsigned long dim)
+        : DrivableRobot(client, name, maxSteeringAngle, dim), _leftRightWheelDistance(leftRightWheelDist),
+          _frontRearWheelDistance(frontRearWheelDist), _fGps(dim), _rGps(dim) {
     auto answ = _client->simxGetObjectHandle("nakedCar_steeringLeft", _client->simxServiceCall());
     _lSteerHandle = b0RemoteApi::readInt(answ, 1);
     answ = _client->simxGetObjectHandle("nakedCar_steeringRight", _client->simxServiceCall());
@@ -17,16 +19,11 @@ AckermannCar::AckermannCar(b0RemoteApi *client, const std::string name, const un
     answ = _client->simxGetObjectHandle("GPSR", _client->simxServiceCall());
     _rGpsHandle = b0RemoteApi::readInt(answ, 1);
 
-    auto topic = client->simxCreateSubscriber(boost::bind(&AckermannCar::fGpsCallback, this, _1));
-    _client->simxGetObjectPosition(_fGpsHandle, -1, topic);
-    topic = client->simxCreateSubscriber(boost::bind(&AckermannCar::rGpsCallback, this, _1));
-    _client->simxGetObjectPosition(_rGpsHandle, -1, topic);
-
+    _maxTurnRadius = frontRearWheelDist / sin(_maxSteeringAngle);
 
     setSteeringAngle(0);
     setSpeed(0);
 }
-
 
 void AckermannCar::setSteeringAngle(double angle) {
     if (angle > 45) {
@@ -36,8 +33,10 @@ void AckermannCar::setSteeringAngle(double angle) {
     }
 
     double radAngle = (angle * M_PI) / 180;
-    double steeringAngleLeft = atan(_l / (-_d + _l / tan(radAngle)));
-    double steeringAngleRight = atan(_l / (_d + _l / tan(radAngle)));
+    double steeringAngleLeft = atan(
+            _frontRearWheelDistance / (-(_leftRightWheelDistance / 2) + _frontRearWheelDistance / tan(radAngle)));
+    double steeringAngleRight = atan(
+            _frontRearWheelDistance / ((_leftRightWheelDistance / 2) + _frontRearWheelDistance / tan(radAngle)));
 
     _client->simxSetJointTargetPosition(_lSteerHandle, steeringAngleLeft, _client->simxDefaultPublisher());
     _client->simxSetJointTargetPosition(_rSteerHandle, steeringAngleRight, _client->simxDefaultPublisher());
@@ -46,6 +45,13 @@ void AckermannCar::setSteeringAngle(double angle) {
 void AckermannCar::setSpeed(float speed) {
     _client->simxSetJointTargetVelocity(_lMotorHandle, speed, _client->simxDefaultPublisher());
     _client->simxSetJointTargetVelocity(_rMotorHandle, speed, _client->simxDefaultPublisher());
+}
+
+void AckermannCar::initSensors() {
+    auto topic = _client->simxCreateSubscriber(boost::bind(&AckermannCar::fGpsCallback, shared_from_this(), _1));
+    _client->simxGetObjectPosition(_fGpsHandle, -1, topic);
+    topic = _client->simxCreateSubscriber(boost::bind(&AckermannCar::rGpsCallback, shared_from_this(), _1));
+    _client->simxGetObjectPosition(_rGpsHandle, -1, topic);
 }
 
 void AckermannCar::fGpsCallback(std::vector<msgpack::object> *msg) {
@@ -66,6 +72,5 @@ void AckermannCar::fGpsCallback(std::vector<msgpack::object> *msg) {
 }
 
 void AckermannCar::rGpsCallback(std::vector<msgpack::object> *msg) {
-    std::vector<float> pos;
     b0RemoteApi::readFloatArray(msg, _rGps, 1);
 }
