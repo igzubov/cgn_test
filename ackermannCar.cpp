@@ -18,6 +18,8 @@ AckermannCar::AckermannCar(std::shared_ptr<b0RemoteApi> client, const std::strin
     _fGpsHandle = b0RemoteApi::readInt(answ, 1);
     answ = _client->simxGetObjectHandle("GPSR", _client->simxServiceCall());
     _rGpsHandle = b0RemoteApi::readInt(answ, 1);
+    answ = _client->simxGetObjectHandle("prox_sensor", _client->simxServiceCall());
+    _proxHandle = b0RemoteApi::readInt(answ, 1);
 
     _maxTurnRadius = frontRearWheelDist / sin(_maxSteeringAngle);
 
@@ -43,6 +45,9 @@ void AckermannCar::setSteeringAngle(double angle) {
 }
 
 void AckermannCar::setSpeed(float speed) {
+    if (_stopDecision) {
+        speed = 0;
+    }
     _client->simxSetJointTargetVelocity(_lMotorHandle, speed, _client->simxDefaultPublisher());
     _client->simxSetJointTargetVelocity(_rMotorHandle, speed, _client->simxDefaultPublisher());
 }
@@ -52,6 +57,8 @@ void AckermannCar::initSensors() {
     _client->simxGetObjectPosition(_fGpsHandle, -1, topic);
     topic = _client->simxCreateSubscriber(boost::bind(&AckermannCar::rGpsCallback, shared_from_this(), _1));
     _client->simxGetObjectPosition(_rGpsHandle, -1, topic);
+    topic = _client->simxCreateSubscriber(boost::bind(&AckermannCar::proxCallback, shared_from_this(), _1));
+    _client->simxCheckProximitySensor(_proxHandle, "sim.handle_all", topic);
 }
 
 void AckermannCar::fGpsCallback(std::vector<msgpack::object> *msg) {
@@ -73,4 +80,8 @@ void AckermannCar::fGpsCallback(std::vector<msgpack::object> *msg) {
 
 void AckermannCar::rGpsCallback(std::vector<msgpack::object> *msg) {
     b0RemoteApi::readFloatArray(msg, _rGps, 1);
+}
+
+void AckermannCar::proxCallback(std::vector<msgpack::object> *msg) {
+    _stopDecision = b0RemoteApi::readInt(msg, 1);
 }

@@ -23,6 +23,8 @@ private:
     int _rMotorHandle = 0;
     int _fGpsHandle = 0;
     int _rGpsHandle = 0;
+    int _proxHandle = 0;
+    int _stopDecision = 0;
 
     std::vector<float> _fGps;
     std::vector<float> _rGps;
@@ -34,6 +36,8 @@ private:
     void fGpsCallback(std::vector<msgpack::object> *msg);
 
     void rGpsCallback(std::vector<msgpack::object> *msg);
+
+    void proxCallback(std::vector<msgpack::object> *msg);
 };
 
 #endif //ACKERMANNCAR_H
