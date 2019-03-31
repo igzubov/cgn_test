@@ -11,14 +11,20 @@ There are 6 modules:
 ## How to use
 1. ``` git clone https://github.com/igzubov/cgn_test/ && cd cgn_test```
 2. ``` mkdir build && cd build ```
-3. ``` cmake .. && make ```
-4. Place points file in the folder with executable **cgn_vrep**
-5. Run scene in the V-REP
-6. ``` ./cgn_vrep points_file ```, 
+3. Change line 5 of CMakeLists.txt from     
+``` set(V-REP_PATH /home/igor/cgn/V-REP_PRO_EDU_V3_6_1_Ubuntu16_04) ```    
+to    
+``` set(V-REP_PATH your_path/V-REP_PRO_EDU_V3_6_1_Ubuntu16_04) ```    
+where **your_path** is an absolute path to your V-REP simulator directory    
+4. ``` cmake .. && make ```
+5. Place points file in the folder with executable **cgn_vrep**
+6. Run scene in the V-REP
+7. ``` ./cgn_vrep points_file ```, 
 where **points_file** is a file containing points in the next format:  
 number_of_points    
 p1_x p1_y    
 p2_x p2_y    
 ... ...
 
-The number of points must be **at least 2** points, which are in the map range (default [-48.5, 48.5] for both x and y)
+The number of points must be **at least 2** points, which are in the map range (default [-48.5, 48.5] for both x and y)    
+For example use points.txt from this repository, which gives spiral trajectory
