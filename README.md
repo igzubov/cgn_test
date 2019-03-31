@@ -27,4 +27,6 @@ p2_x p2_y
 ... ...
 
 The number of points must be **at least 2** points, which are in the map range (default [-48.5, 48.5] for both x and y)    
-For example use points.txt from this repository, which gives spiral trajectory
+For example use points.txt from this repository, which gives spiral trajectory    
+
+![Spiral trajectory](https://i.imgur.com/JA12Ex1.png)
