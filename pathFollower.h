@@ -10,7 +10,7 @@
 
 class PathFollower {
 public:
-    PathFollower(const std::string &fileName);
+    PathFollower(std::vector<std::vector<float>> points);
 
     bool _achievedPoint = true;
     const double _achieveXEps = 1;
@@ -18,24 +18,31 @@ public:
 
     bool isEmpty();
 
+    bool verifyPath();
 
-    double getDeltaAngle(double yaw, std::vector<float> currPos);
+    double getDeltaAngle(double yaw, std::vector<float> currPos, double maxTurnRadius);
 
-    std::queue<std::vector<float>> getPoints();
+    std::vector<std::vector<float>> getPoints();
 
 private:
-    std::fstream _pointsStream;
-    std::queue<std::vector<float>> _wayPoints;
-    std::vector<float> _prevTarget;
+    std::vector<std::vector<float>> _wayPoints;
     std::vector<float> _currTarget;
-    std::vector<float> _prevPos;
-    std::vector<float> _currPos;
-
-    void readPoints(std::queue<std::vector<float>> &points);
+    long _currTargetNum;
+    bool _isAddPoint = false;
+    bool _prevAddPoint = false;
 
     void checkPointAchievement(std::vector<float> currPos);
 
+    bool isPointReachable(const double &angle, const double &yaw, const double maxTurnRadius,
+                          const std::vector<float> &currPos, const std::vector<float> &point);
+
+    bool isPointReachable(const std::vector<float> &currPos);
+
     double cutAngle(double &bigAngle);
+
+    double calcVectorAng(const std::vector<float> prevLine, const std::vector<float> currLine);
+
+    void removePoints();
 };
 
 #endif //PATHFOLLOWER_H
