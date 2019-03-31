@@ -1,6 +1,7 @@
 #include "trajVisualizer.h"
 
-TrajVisualizer::TrajVisualizer(b0RemoteApi *client) : _targetTrajColor{255, 0, 0}, _currTrajColor{0, 255, 0} {
+TrajVisualizer::TrajVisualizer(std::shared_ptr<b0RemoteApi> client) : _targetTrajColor{255, 0, 0},
+                                                                      _currTrajColor{0, 255, 0}, _currTrajHandles(200) {
     _client = client;
 }
 
@@ -10,43 +11,41 @@ int TrajVisualizer::drawLine(const std::vector<float> &from, const std::vector<f
     return b0RemoteApi::readInt(answ, 1);
 }
 
-void TrajVisualizer::drawTargetTrajectory(const std::vector<float> &start, std::queue<std::vector<float>> points) {
+void TrajVisualizer::drawTargetTrajectory(const std::vector<float> &start, std::vector<std::vector<float>> points) {
     std::vector<float> prevPoint = start;
     std::vector<float> currPoint;
-
-    long amount = points.size();
     int handle = 0;
-    for (int i = 0; i < amount; i++) {
-        currPoint = points.front();
-        points.pop();
+
+    for (auto point : points) {
+        currPoint = point;
         handle = drawLine(prevPoint, currPoint, _targetTrajColor);
-        _targetTrajHandles.push(handle);
+        _targetTrajHandles.push_back(handle);
         prevPoint = currPoint;
     }
-
 }
 
 void TrajVisualizer::drawCurrTrajectory(const std::vector<float> &from, const std::vector<float> &to) {
     int handle = 0;
-    if (_currTrajHandles.size() > 200) {
-        handle = _currTrajHandles.front();
-        _currTrajHandles.pop();
+    if (_currTrajSize == 200) {
+        handle = _currTrajHandles[_currTrajIndex];
         _client->simxRemoveDrawingObject(handle, _client->simxDefaultPublisher());
+    } else {
+        _currTrajSize++;
     }
     handle = drawLine(from, to, _currTrajColor);
-    _currTrajHandles.push(handle);
+    _currTrajHandles[_currTrajIndex] = handle;
+    _currTrajIndex++;
+    if (_currTrajIndex == 200) {
+        _currTrajIndex = 0;
+    }
 }
 
 void TrajVisualizer::clearAllTrajectories() {
-    long amount = _currTrajHandles.size();
-    for (int i = 0; i < amount; i++) {
-        _client->simxRemoveDrawingObject(_currTrajHandles.front(), _client->simxDefaultPublisher());
-        _currTrajHandles.pop();
+    for (auto handle : _currTrajHandles) {
+        _client->simxRemoveDrawingObject(handle, _client->simxDefaultPublisher());
     }
 
-    amount = _targetTrajHandles.size();
-    for (int i = 0; i < amount; i++) {
-        _client->simxRemoveDrawingObject(_targetTrajHandles.front(), _client->simxDefaultPublisher());
-        _targetTrajHandles.pop();
+    for (auto handle : _targetTrajHandles) {
+        _client->simxRemoveDrawingObject(handle, _client->simxDefaultPublisher());
     }
 }
